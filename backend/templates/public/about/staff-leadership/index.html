@@ -83,13 +83,23 @@
 <img alt="Hines Logo" src="{% static 'frontend_assets/ab4f449639117ccdc01dd29c.svg' %}" style="height: 40px; width: auto; display: block;">
 </a>
 </div>
+<div class="masthead__mobile-actions">
+{% if not request.user.is_authenticated %}
+<a class="masthead__mobile-login" href="/client-login/">Client Login</a>
+<a class="masthead__mobile-signup" href="/sign-up/">Sign Up</a>
+{% else %}
+<a class="masthead__mobile-dashboard" href="/dashboard/">Dashboard</a>
+{% endif %}
 <button aria-controls="NavDrawer" aria-expanded="false" class="masthead__trigger u-type-label" data-nav-drawer-toggle="">Menu</button>
+</div>
 <div class="masthead__nav">
 <nav class="h-nav h-nav--secondary">
 <ul class="h-nav__list">
+{% if not request.user.is_authenticated %}
 <li class="h-nav__item">
 <a class="link link--alt link--icon link--right-carat" href="/sign-up/">Sign Up</a>
 </li>
+{% endif %}
 <li class="h-nav__item">
 <a class="link link--alt link--icon link--right-carat js-contact-trigger" href="../../contact/index.html">Contact Us</a>
 </li>
@@ -359,9 +369,15 @@
 </div>
 </div>
 </li>
+{% if not request.user.is_authenticated %}
 <li class="h-nav__item">
 <a class="h-nav__link" href="/client-login/">Client Login</a>
-</li></ul>
+</li>
+{% else %}
+<li class="h-nav__item">
+<a class="h-nav__link" href="/dashboard/">Dashboard</a>
+</li>
+{% endif %}</ul>
 </nav>
 </div>
 </div>
@@ -588,7 +604,12 @@ Standard, white, and dark all have this standard applied.  -->
 </div> </div>
 </div>
 </li>
-<li class="v-nav__item-top u-type-h3"><a class="v-nav__link" href="/client-login/">Client Login</a></li><li class="v-nav__item-top u-type-h3">
+{% if not request.user.is_authenticated %}
+<li class="v-nav__item-top u-type-h3"><a class="v-nav__link" href="/sign-up/">Sign Up</a></li>
+<li class="v-nav__item-top u-type-h3"><a class="v-nav__link" href="/client-login/">Client Login</a></li>
+{% else %}
+<li class="v-nav__item-top u-type-h3"><a class="v-nav__link" href="/dashboard/">Dashboard</a></li>
+{% endif %}<li class="v-nav__item-top u-type-h3">
 <a class="link link--alt link--icon link--search" href="https://www.hines.com/search/"><span class="v-nav__link">Search</span></a>
 </li>
 </ul>

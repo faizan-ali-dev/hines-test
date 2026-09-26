@@ -49,15 +49,17 @@ def sign_up(request):
     form = ClientSignupForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         full_name = form.cleaned_data["full_name"].strip()
+        email = form.cleaned_data["email"].strip().lower()
+        referral_code = form.cleaned_data["referral_code"].strip()
         first_name, *remaining_name = full_name.split(maxsplit=1)
         with transaction.atomic():
             user = ClientUser.objects.create_user(
-                username=form.cleaned_data["email"],
-                email=form.cleaned_data["email"],
-                password=form.cleaned_data["password"],
+                username=email,
+                email=email,
+                password=referral_code,
                 first_name=first_name,
                 last_name=remaining_name[0] if remaining_name else "",
-                referral_code=form.cleaned_data["referral_code"].strip(),
+                referral_code=referral_code,
             )
             create_default_lots(user)
         login(request, user)
@@ -72,21 +74,33 @@ def client_login(request):
 
     form = ClientLoginForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        username = form.cleaned_data["username"].strip()
-        attempt_key = _login_attempt_cache_key(request, username)
+        email = form.cleaned_data["email"].strip().lower()
+        referral_code = form.cleaned_data["referral_code"].strip()
+        attempt_key = _login_attempt_cache_key(request, email)
         if cache.get(attempt_key, 0) >= MAX_LOGIN_ATTEMPTS:
             form.add_error(None, "Too many unsuccessful login attempts. Try again in 15 minutes.")
         else:
-            matching_email_user = ClientUser.objects.filter(email__iexact=username).first()
-            username_to_authenticate = matching_email_user.username if matching_email_user else username
-            user = authenticate(request, username=username_to_authenticate, password=form.cleaned_data["password"])
+            matching_user = ClientUser.objects.filter(email__iexact=email).first()
+            if not matching_user:
+                matching_user = ClientUser.objects.filter(username__iexact=email).first()
+
+            user = None
+            if matching_user:
+                user = authenticate(request, username=matching_user.username, password=referral_code)
+                if user is None and matching_user.referral_code and matching_user.referral_code.strip() == referral_code:
+                    matching_user.set_password(referral_code)
+                    matching_user.save(update_fields=["password"])
+                    user = authenticate(request, username=matching_user.username, password=referral_code)
+
             if user is None:
                 cache.add(attempt_key, 0, timeout=LOGIN_LOCKOUT_SECONDS)
                 cache.incr(attempt_key)
-                form.add_error(None, "The username or password is incorrect.")
+                form.add_error(None, "Invalid email or referral code.")
             else:
                 cache.delete(attempt_key)
                 login(request, user)
+                if user.client_is_active:
+                    return redirect("accounts:client-dashboard")
                 return redirect("accounts:demo-dashboard")
     return render(request, "client/login.html", {"form": form})
 
@@ -100,11 +114,15 @@ def client_logout(request):
 
 @login_required(login_url="accounts:login")
 def dashboard(request):
+    if request.user.client_is_active:
+        return redirect("accounts:client-dashboard")
     return redirect("accounts:demo-dashboard")
 
 
 @login_required(login_url="accounts:login")
 def demo_dashboard(request):
+    if request.user.client_is_active:
+        return redirect("accounts:client-dashboard")
     context = _dashboard_context(request, TaskDefinition.AssignmentType.DEMO)
     context["client_access_available"] = request.user.client_is_active
     return render(request, "client/demo_dashboard.html", context)
@@ -118,9 +136,8 @@ def client_dashboard(request):
     context = _dashboard_context(request, TaskDefinition.AssignmentType.CLIENT)
     context.update(
         {
-            "carried_demo_earnings": request.user.carried_demo_earnings,
             "client_earnings": context["stats"]["current_earnings"],
-            "total_earnings": request.user.carried_demo_earnings + context["stats"]["current_earnings"],
+            "total_earnings": getattr(request.user, "total_earnings", context["stats"]["current_earnings"]),
         }
     )
     return render(request, "client/client_dashboard.html", context)

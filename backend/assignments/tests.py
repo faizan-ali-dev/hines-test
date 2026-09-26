@@ -56,18 +56,21 @@ class AssignmentServiceTests(TestCase):
         )
         self.assertEqual(ProgressChange.objects.count(), 2)
 
-    def test_client_activation_carries_demo_earnings_once(self):
+    def test_client_activation_removes_demo_earnings_and_tasks(self):
         with self.assertRaisesMessage(ValueError, "All Demo lots must be completed"):
             activate_client_account(self.employee)
 
         set_progress(self.employee, TaskDefinition.AssignmentType.DEMO, 15)
         activated = activate_client_account(self.employee)
         self.assertTrue(activated.client_is_active)
-        self.assertEqual(activated.carried_demo_earnings, Decimal("65.00"))
+        self.assertEqual(activated.demo_earnings, Decimal("0.00"))
+        self.assertEqual(activated.total_earnings, Decimal("0.00"))
+        self.assertFalse(AssignmentLot.objects.filter(employee=self.employee, assignment_type=TaskDefinition.AssignmentType.DEMO).exists())
 
-        set_progress(self.employee, TaskDefinition.AssignmentType.DEMO, 14)
-        activated_again = activate_client_account(self.employee)
-        self.assertEqual(activated_again.carried_demo_earnings, Decimal("65.00"))
+        set_progress(self.employee, TaskDefinition.AssignmentType.CLIENT, 14)
+        activated.refresh_from_db()
+        self.assertGreater(activated.client_earnings, Decimal("0.00"))
+        self.assertEqual(activated.total_earnings, activated.client_earnings)
 
     def test_staff_can_add_a_custom_task_and_mark_it_complete(self):
         task = TaskDefinition.objects.create(
@@ -94,6 +97,7 @@ class AssignmentServiceTests(TestCase):
 
         moved = set_assignment_status(self.employee, "client")
         self.assertTrue(moved.client_is_active)
-        self.assertEqual(moved.carried_demo_earnings, Decimal("90.00"))
+        self.assertEqual(moved.demo_earnings, Decimal("0.00"))
+        self.assertEqual(moved.total_earnings, Decimal("0.00"))
 
 # Create your tests here.

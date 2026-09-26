@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -13,7 +14,25 @@ class ClientUser(AbstractUser):
     referral_code = models.CharField(max_length=100, blank=True)
     demo_progress = models.PositiveSmallIntegerField(default=0)
     client_progress = models.PositiveSmallIntegerField(default=0)
-    carried_demo_earnings = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    demo_earnings = models.DecimalField(
+        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        verbose_name="Demo earnings",
+        help_text="Demo earnings (auto-calculated from completed demo tasks, but editable)."
+    )
+    client_earnings = models.DecimalField(
+        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        verbose_name="Client earnings",
+        help_text="Client earnings (auto-calculated from completed client tasks, but editable)."
+    )
+    total_earnings = models.DecimalField(
+        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        verbose_name="Total earnings",
+        help_text="Total earnings (auto-calculated, but editable by admin)."
+    )
+    carried_demo_earnings = models.DecimalField(
+        max_digits=12, decimal_places=2, default=Decimal("0.00"),
+        verbose_name="Carried demo earnings"
+    )
     client_activated_at = models.DateTimeField(blank=True, null=True)
     assignment_status = models.CharField(max_length=10, choices=AssignmentStatus.choices, default=AssignmentStatus.DEMO)
 

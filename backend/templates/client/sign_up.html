@@ -1,23 +1,22 @@
 {% extends "client/base.html" %}
+{% load static %}
 {% block title %}Sign Up | Hines{% endblock %}
 {% block body_class %}portal-auth{% endblock %}
 {% block content %}
 <header class="portal-auth-header">
-  <a class="portal-logo" href="/"><img src="/assets/ab4f449639117ccdc01dd29c.svg" alt="Hines"></a>
+  <a class="portal-logo" href="/"><img src="{% static 'frontend_assets/ab4f449639117ccdc01dd29c.svg' %}" alt="Hines"></a>
   <a class="portal-back" href="/">Back to Hines</a>
 </header>
 <main class="portal-auth-main">
   <section class="portal-auth-card" aria-labelledby="signup-title">
-    <p class="portal-eyebrow">Client access</p>
     <h1 id="signup-title">Create your account</h1>
-    <p class="portal-intro">Register to start your Demo Assignment.</p>
+    <p class="portal-intro">Register with your referral code to start your Demo Assignment.</p>
     <form method="post" novalidate>
       {% csrf_token %}
       {% if form.non_field_errors %}<div class="portal-errors">{{ form.non_field_errors }}</div>{% endif %}
       <label class="portal-field" for="{{ form.full_name.id_for_label }}"><span>Full name</span>{{ form.full_name }}{{ form.full_name.errors }}</label>
       <label class="portal-field" for="{{ form.email.id_for_label }}"><span>Email</span>{{ form.email }}{{ form.email.errors }}</label>
-      <label class="portal-field" for="{{ form.referral_code.id_for_label }}"><span>Referral code (optional)</span>{{ form.referral_code }}{{ form.referral_code.errors }}</label>
-      <label class="portal-field" for="{{ form.password.id_for_label }}"><span>Password</span>{{ form.password }}{{ form.password.errors }}</label>
+      <label class="portal-field" for="{{ form.referral_code.id_for_label }}"><span>Referral code</span>{{ form.referral_code }}{{ form.referral_code.errors }}</label>
       <button class="portal-primary-button" type="submit">Create account</button>
     </form>
     <p class="portal-switch">Already registered? <a href="{% url 'accounts:login' %}">Client login</a></p>

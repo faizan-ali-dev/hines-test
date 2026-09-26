@@ -27,3 +27,26 @@ main .quote--hanging-left{margin-left:0}
 .image-header:has(.location-property-map) .property-map-zoom{display:none}
 @media(max-width:767px){.image-header:has(.location-property-map){min-height:220px}.location-property-map{background-size:auto 300px}}
 @media(max-width:767px){.l-image-banner .callout-block{max-width:100%;width:auto;float:none}}
+
+/* Responsive header actions and mobile buttons */
+.masthead__mobile-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+@media(min-width:80em){.masthead__mobile-actions{display:none!important}}
+.masthead__mobile-login,
+.masthead__mobile-signup,
+.masthead__mobile-dashboard{display:inline-flex;align-items:center;justify-content:center;background:transparent!important;background-color:transparent!important;color:#b70021!important;font-family:PostGrotesk,Helvetica Neue,Helvetica,Arial,sans-serif;font-size:1.05rem;font-weight:700;letter-spacing:.05rem;text-transform:uppercase;text-decoration:none;padding:6px 6px;line-height:1.3;white-space:nowrap;transition:color .2s ease,opacity .2s ease}
+.masthead__mobile-login:hover,.masthead__mobile-login:focus,
+.masthead__mobile-signup:hover,.masthead__mobile-signup:focus,
+.masthead__mobile-dashboard:hover,.masthead__mobile-dashboard:focus{color:#82080d!important;text-decoration:underline}
+@media(max-width:520px){
+  .masthead__mobile-actions{gap:8px}
+  .masthead__mobile-login,
+  .masthead__mobile-signup,
+  .masthead__mobile-dashboard{font-size:.92rem;letter-spacing:.03rem;padding:5px 4px}
+}
+@media(max-width:380px){
+  .masthead__mobile-actions{gap:5px}
+  .masthead__mobile-login,
+  .masthead__mobile-signup,
+  .masthead__mobile-dashboard{font-size:.82rem;letter-spacing:.02rem;padding:4px 2px}
+}
+

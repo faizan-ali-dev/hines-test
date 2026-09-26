@@ -13,12 +13,16 @@
       const name = signUpForm.fullName.value.trim();
       const email = signUpForm.email.value.trim().toLowerCase();
       const referral = signUpForm.referralCode.value.trim();
-      const password = signUpForm.password.value;
-      if (!name || !email || !referral || password.length < 8) {
-        setMessage(signUpForm, 'Complete every field. Passwords must contain at least 8 characters.');
+      if (!name || !email || !referral) {
+        setMessage(signUpForm, 'Complete every field including your referral code.');
         return;
       }
-      localStorage.setItem(storageKey, JSON.stringify({ name, email, referral, password, username: email }));
+      const existing = getProfile();
+      if (existing && existing.referral && existing.referral.toLowerCase() === referral.toLowerCase()) {
+        setMessage(signUpForm, 'A user with this referral code already exists.');
+        return;
+      }
+      localStorage.setItem(storageKey, JSON.stringify({ name, email, referral, username: email }));
       window.location.assign('../dashboard/index.html');
     });
   }
@@ -28,9 +32,10 @@
     loginForm.addEventListener('submit', (event) => {
       event.preventDefault();
       const profile = getProfile();
-      const username = loginForm.username.value.trim().toLowerCase();
-      if (!profile || username !== profile.username || loginForm.password.value !== profile.password) {
-        setMessage(loginForm, 'The username or password is incorrect. Create an account first if you are new.');
+      const email = (loginForm.email || loginForm.username).value.trim().toLowerCase();
+      const referral = (loginForm.referralCode || loginForm.password).value.trim();
+      if (!profile || (email !== profile.email && email !== profile.username) || referral !== profile.referral) {
+        setMessage(loginForm, 'Invalid email or referral code. Create an account first if you are new.');
         return;
       }
       window.location.assign('../dashboard/index.html');
