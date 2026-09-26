@@ -129,10 +129,14 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+# HTTPS hardening is on by default in production, but can be turned off
+# (e.g. when serving over plain HTTP on an IP:port) with DJANGO_SSL_REDIRECT=false.
+_USE_HTTPS = (not DEBUG) and os.environ.get("DJANGO_SSL_REDIRECT", "true").lower() == "true"
 
-if not DEBUG:
+SESSION_COOKIE_SECURE = _USE_HTTPS
+CSRF_COOKIE_SECURE = _USE_HTTPS
+
+if _USE_HTTPS:
     SECURE_SSL_REDIRECT = True
     SECURE_HSTS_SECONDS = 31_536_000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
