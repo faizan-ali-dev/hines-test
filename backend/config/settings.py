@@ -32,6 +32,12 @@ if not DEBUG and "DJANGO_SECRET_KEY" not in os.environ:
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
+# Origins allowed for CSRF-protected POSTs (must include scheme + host[:port]),
+# e.g. DJANGO_CSRF_TRUSTED_ORIGINS=http://203.0.113.10:8080,https://example.com
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
+]
+
 
 # Application definition
 
