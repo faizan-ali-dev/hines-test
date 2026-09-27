@@ -1,0 +1,15 @@
+.git
+.github
+.env
+capture/
+diagnostics/
+layout-qa/
+security-audit/
+app.js
+OPEN-FRONTEND.html
+*.log
+*.zip
+backend/staticfiles/
+backend/db.sqlite3
+__pycache__/
+*.pyc
